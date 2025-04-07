@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - Artist Name</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = { /* ... Same Tailwind config ... */ }
+    </script>
+    <style>
+        /* Paste ALL CSS from the previous style.css content here */
+        /* --- Base & Theme --- */ :root { /* ... */ } .dark { /* ... */ }
+        /* ... Base Body/Heading Styles ... */
+        /* ... Animation Base Classes ... */
+        /* ... Component & Section Specific Styles (Header, Hero, Collections, etc...) ... */
+        /* --- Gallery Page Styles --- */ /* ... */
+        /* --- Artwork Detail Page Styles --- */ /* ... */
+        /* --- About Page Styles --- */ /* ... */
+        /* --- Contact Page Styles --- */ /* ... */
+        /* ... etc ... */
+    </style>
+</head>
+<body x-data="appState" x-init="init(); initAboutPage();" class="bg-art-bg text-art-text font-body antialiased">
+
+    <header id="main-header" class="fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-out-expo" :class="{ 'py-3 bg-art-bg/90 dark:bg-art-bg/85 backdrop-blur-lg shadow-sm header-scrolled': scrolled, 'py-6': !scrolled }">
+         <nav class="container mx-auto px-6 flex justify-between items-center">
+             <a href="index.html#home" class="text-2xl font-display font-semibold tracking-tight hover:text-art-accent transition-colors duration-300">Artist Name</a>
+             <div class="hidden md:flex space-x-8 items-center">
+                 <a href="index.html#home" class="nav-link">Home</a>
+                 <a href="index.html#collections" class="nav-link">Collections</a>
+                 <a href="about.html" class="nav-link active">About</a> <a href="gallery.html" class="nav-link">Gallery</a>
+                 <a href="contact.html" class="nav-link">Contact</a>
+                 <button @click="toggleTheme" title="Toggle Theme" class="p-2 rounded-full text-art-text/70 hover:text-art-text hover:bg-art-secondary-bg transition-all duration-300" :aria-checked="isDarkMode.toString()">
+                     <svg x-show="!isDarkMode" class="w-5 h-5 transition-opacity duration-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg>
+                     <svg x-show="isDarkMode" class="w-5 h-5 transition-opacity duration-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" /></svg>
+                 </button>
+             </div>
+             <button @click="isMobileMenuOpen = !isMobileMenuOpen" class="md:hidden focus:outline-none p-2 -mr-2 text-art-text/80 hover:text-art-text transition-colors" aria-controls="mobile-menu" :aria-expanded="isMobileMenuOpen.toString()">
+                 <svg x-show="!isMobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
+                 <svg x-show="isMobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+             </button>
+         </nav>
+         <div x-show="isMobileMenuOpen" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" @click.outside="isMobileMenuOpen = false" id="mobile-menu" class="md:hidden absolute top-full left-0 right-0 bg-art-bg shadow-lg mt-px">
+             <div class="px-2 pt-2 pb-3 space-y-1">
+                 <a href="index.html#home" @click="isMobileMenuOpen = false" class="mobile-nav-link">Home</a>
+                 <a href="index.html#collections" @click="isMobileMenuOpen = false" class="mobile-nav-link">Collections</a>
+                 <a href="about.html" @click="isMobileMenuOpen = false" class="mobile-nav-link active">About</a>
+                 <a href="gallery.html" @click="isMobileMenuOpen = false" class="mobile-nav-link">Gallery</a>
+                 <a href="contact.html" @click="isMobileMenuOpen = false" class="mobile-nav-link">Contact</a>
+              </div>
+          </div>
+    </header>
+
+    <main class="pt-24 md:pt-32">
+        <section class="container mx-auto px-6 py-16 md:py-24 text-center">
+             <div class="reveal-container">
+                 <h1 class="text-5xl md:text-7xl font-display reveal-mask-up">The Artist</h1>
+             </div>
+             <div class="mt-6 max-w-3xl mx-auto fade-in-up">
+                 <p class="text-xl md:text-2xl leading-relaxed text-art-text/80">
+                     [Artist Name] is a contemporary painter exploring the intersection of light, memory, and emotion.
+                 </p>
+             </div>
+        </section>
+
+        <section id="visual-bio" class="overflow-hidden">
+            <div class="bio-timeline-item min-h-screen grid grid-cols-1 md:grid-cols-2 items-center gap-12 px-6 py-16">
+                 <div class="bio-text order-last md:order-first text-center md:text-left md:pl-12 lg:pl-24">
+                     <h2 class="text-3xl md:text-4xl font-display mb-4">Early Inspirations</h2>
+                     <p class="text-lg leading-relaxed max-w-md mx-auto md:mx-0">Growing up surrounded by nature, the changing seasons became an early muse, teaching the nuances of light and color.</p>
+                 </div>
+                 <div class="bio-image aspect-w-4 aspect-h-5 md:aspect-h-4 rounded-lg overflow-hidden shadow-lg">
+                     <img src="https://images.unsplash.com/photo-1470115636492-6d2b56f9146d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="Early influence landscape" class="w-full h-full object-cover">
+                 </div>
+            </div>
+            <div class="bio-timeline-item min-h-screen grid grid-cols-1 md:grid-cols-2 items-center gap-12 px-6 py-16 bg-art-secondary-bg">
+                 <div class="bio-image aspect-w-4 aspect-h-5 md:aspect-h-4 rounded-lg overflow-hidden shadow-lg">
+                     <img src="https://images.unsplash.com/photo-1581195193284-71a068a4971b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&q=80" alt="Formative abstract work" class="w-full h-full object-cover">
+                 </div>
+                 <div class="bio-text text-center md:text-left md:pr-12 lg:pr-24">
+                     <h2 class="text-3xl md:text-4xl font-display mb-4">Formative Years</h2>
+                     <p class="text-lg leading-relaxed max-w-md mx-auto md:mx-0">Formal training honed technical skills, but it was experimentation with abstract forms that unlocked a unique artistic voice.</p>
+                 </div>
+            </div>
+             <div class="bio-timeline-item min-h-screen grid grid-cols-1 md:grid-cols-2 items-center gap-12 px-6 py-16">
+                 <div class="bio-text order-last md:order-first text-center md:text-left md:pl-12 lg:pl-24">
+                     <h2 class="text-3xl md:text-4xl font-display mb-4">Finding A Style</h2>
+                     <p class="text-lg leading-relaxed max-w-md mx-auto md:mx-0">The signature style emerged, blending realistic elements with expressive, textured backgrounds, creating dreamlike atmospheres.</p>
+                 </div>
+                 <div class="bio-image aspect-w-4 aspect-h-5 md:aspect-h-4 rounded-lg overflow-hidden shadow-lg">
+                      <img src="https://images.unsplash.com/photo-1531913131401-1606a4b15653?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=814&q=80" alt="Signature style example" class="w-full h-full object-cover">
+                 </div>
+            </div>
+        </section>
+
+        <section class="py-20 md:py-32 container mx-auto px-6 text-center">
+             <blockquote class="max-w-3xl mx-auto relative">
+                 <span class="artist-quote-mark left">“</span>
+                 <p class="text-2xl md:text-3xl lg:text-4xl italic font-display leading-snug md:leading-normal reveal-mask-up inline">
+                    Painting, for me, is not about replicating reality, but interpreting the feelings it evokes. It's a translation of internal landscapes onto the canvas, a search for resonance between the seen and the unseen.
+                 </p>
+                 <span class="artist-quote-mark right">”</span>
+             </blockquote>
+             <cite class="block mt-6 text-xl font-display fade-in-up">- Artist Name</cite>
+        </section>
+
+        <section id="highlights" class="py-20 md:py-24 bg-art-secondary-bg">
+            <div class="container mx-auto px-6">
+                <h2 class="text-4xl md:text-5xl font-display text-center mb-16 reveal-container"><span class="reveal-mask-up">Career Highlights</span></h2>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="achievement-card bg-art-bg p-6 rounded-lg border border-art-border">
+                         <span class="card-icon mb-3 block text-art-accent"><svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5A.75.75 0 0114.25 12h4.5A.75.75 0 0119.5 12.75V21M4.5 3h15M4.5 3a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 004.5 21h6.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span>
+                         <h3 class="font-display text-xl mb-1">Solo Exhibition: "Echoes"</h3>
+                         <p class="text-sm text-art-text/80 mb-2">Avant Garde Gallery, New York</p>
+                         <span class="text-xs font-semibold tracking-wider uppercase text-art-text/60">2023</span>
+                     </div>
+                     <div class="achievement-card bg-art-bg p-6 rounded-lg border border-art-border">
+                          <span class="card-icon mb-3 block text-art-accent"><svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-4.5m0 4.5a3 3 0 003-3h-15a3 3 0 003 3m9 0V9.375m0 9.375a3 3 0 01-3-3h1.5m-1.5 3a3 3 0 00-3-3M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg></span>
+                          <h3 class="font-display text-xl mb-1">Luminous Art Prize</h3>
+                          <p class="text-sm text-art-text/80 mb-2">Finalist</p>
+                          <span class="text-xs font-semibold tracking-wider uppercase text-art-text/60">2022</span>
+                      </div>
+                     <div class="achievement-card bg-art-bg p-6 rounded-lg border border-art-border">
+                          <span class="card-icon mb-3 block text-art-accent"><svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg></span>
+                          <h3 class="font-display text-xl mb-1">Featured: ArtConnect Magazine</h3>
+                          <p class="text-sm text-art-text/80 mb-2">"Emerging Voices" Profile</p>
+                          <span class="text-xs font-semibold tracking-wider uppercase text-art-text/60">2021</span>
+                      </div>
+                 </div>
+            </div>
+        </section>
+
+         <section id="process" class="py-20 md:py-32 overflow-hidden">
+             <div class="container mx-auto px-6">
+                 <h2 class="text-4xl md:text-5xl font-display text-center mb-16 reveal-container"><span class="reveal-mask-up">Inside the Studio</span></h2>
+                 <div id="studio-parallax" class="relative h-[60vh] md:h-[80vh] rounded-lg overflow-hidden shadow-xl mb-20">
+                     <div class="studio-parallax-bg absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1569774109605-190bf5f6bb67?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1600&q=80');"></div>
+                 </div>
+                 <div class="max-w-3xl mx-auto space-y-12">
+                     <div class="process-step flex items-start sm:items-center gap-6 sm:gap-8">
+                         <span class="step-number mt-1 sm:mt-0">01</span>
+                         <div>
+                            <h3 class="font-display text-2xl mb-2">Conceptualization</h3>
+                            <p class="text-art-text/80">Every piece begins with an emotion or a fleeting image, captured first in thought and quick sketches before touching the canvas.</p>
+                         </div>
+                     </div>
+                      <div class="process-step flex items-start sm:items-center gap-6 sm:gap-8">
+                         <span class="step-number mt-1 sm:mt-0">02</span>
+                         <div>
+                            <h3 class="font-display text-2xl mb-2">Building Layers</h3>
+                             <p class="text-art-text/80">Working primarily with oils, layers are meticulously built up, allowing textures and underlying colors to interact and create depth.</p>
+                         </div>
+                     </div>
+                      <div class="process-step flex items-start sm:items-center gap-6 sm:gap-8">
+                         <span class="step-number mt-1 sm:mt-0">03</span>
+                         <div>
+                            <h3 class="font-display text-2xl mb-2">Refinement & Reflection</h3>
+                             <p class="text-art-text/80">The final stages involve stepping back, refining details, ensuring the initial feeling is truthfully conveyed, and knowing when the conversation is complete.</p>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+         </section>
+
+    </main>
+
+    <footer class="py-16 bg-art-secondary-bg text-center border-t border-art-border mt-12">
+         </footer>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            // Global Alpine State
+            Alpine.data('appState', () => ({
+                isDarkMode: false, isMobileMenuOpen: false, scrolled: false,
+                init() { /* ... same init logic ... */ },
+                toggleTheme() { /* ... same toggle logic ... */ },
+                handleScroll() { /* ... same scroll logic ... */ },
+                scrollTo(selector) { /* ... same scroll logic ... */ },
+                closeMenuAndScroll(selector) { /* ... same logic ... */ }
+             }));
+         });
+
+        function initAboutPage() {
+            gsap.registerPlugin(ScrollTrigger);
+
+            // --- Scrollytelling Animation ---
+            gsap.utils.toArray(".bio-timeline-item").forEach((section, i) => {
+                 const text = section.querySelector(".bio-text"); const image = section.querySelector(".bio-image");
+                 const tl = gsap.timeline({ scrollTrigger: { trigger: section, start: "top center+=100", end: "bottom center-=100", scrub: 1, } });
+                 tl.fromTo(text, { opacity: 0.2, y: 50 }, { opacity: 1, y: 0, ease: "power2.out" });
+                 tl.fromTo(image, { opacity: 0.7, scale: 0.98 }, { opacity: 1, scale: 1, ease: "power2.out" }, "<");
+             });
+
+            // --- Artist Statement Quote Marks ---
+             gsap.from(".artist-quote-mark.left", { scrollTrigger: { trigger: ".artist-quote-mark.left", start: "top 80%", once: true }, x: -50, opacity: 0, duration: 1, ease: 'power3.out' });
+             gsap.from(".artist-quote-mark.right", { scrollTrigger: { trigger: ".artist-quote-mark.right", start: "top 80%", once: true }, x: 50, opacity: 0, duration: 1, ease: 'power3.out' });
+              // Also reveal the quote text itself
+             const quoteText = document.querySelector('.artist-statement blockquote .reveal-mask-up');
+             if(quoteText) {
+                 gsap.to(quoteText.closest('.reveal-container') || quoteText.parentElement, {
+                     scrollTrigger: { trigger: quoteText, start: "top 85%", once: true },
+                     onComplete: () => (quoteText.closest('.reveal-container') || quoteText.parentElement).classList.add('is-visible')
+                 });
+             }
+
+             // --- Career Highlights Stagger ---
+             ScrollTrigger.batch(".achievement-card", {
+                 batchMax: 3, onEnter: batch => gsap.from(batch, { opacity: 0, y: 30, stagger: 0.15, duration: 0.7, ease: 'power3.out' }), start: "top 85%", once: true
+             });
+              // Initial set for highlights if needed, but GSAP .from handles it
+              // gsap.set(".achievement-card", { opacity: 0, y: 30 });
+
+            // --- Studio Parallax ---
+             gsap.to(".studio-parallax-bg", {
+                 yPercent: 20, ease: "none",
+                 scrollTrigger: { trigger: "#studio-parallax", start: "top bottom", end: "bottom top", scrub: true }
+             });
+
+            // --- Process Steps Stagger ---
+             gsap.from(".process-step", {
+                 scrollTrigger: { trigger: ".process-step", start: "top 85%" },
+                 opacity: 0, x: -50, stagger: 0.2, duration: 0.8, ease: 'power3.out'
+             });
+              gsap.set(".process-step", { opacity: 0, x: -50 }); // Set initial state
+
+             console.log("About page specific JS initialized.");
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Art Gallery - Homepage v2</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        /* --- Base & Theme --- */
+        :root {
+            --bg-color-light: #FFFFFF; /* */
+            --text-color-light: #333333; /* */
+            --secondary-bg-light: #F8F8F8; /* */
+            --accent-color: #B76E79; /* Placeholder - Artist-selected */
+            --bg-color-dark: #121212; /* */
+            --text-color-dark: #F0F0F0; /* */
+            --secondary-bg-dark: #1E1E1E; /* */
+
+            --ease-out-quad: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            --ease-out-cubic: cubic-bezier(0.215, 0.610, 0.355, 1);
+            --ease-in-out-cubic: cubic-bezier(0.645, 0.045, 0.355, 1);
+        }
+
+        .dark {
+            --bg-color: var(--bg-color-dark);
+            --text-color: var(--text-color-dark);
+            --secondary-bg: var(--secondary-bg-dark);
+        }
+        :root:not(.dark) {
+             --bg-color: var(--bg-color-light);
+            --text-color: var(--text-color-light);
+            --secondary-bg: var(--secondary-bg-light);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif; /* */
+            font-weight: 300; /* Slightly lighter default body weight */
+            line-height: 1.7; /* Increased line height for readability */
+            transition: background-color 0.4s ease, color 0.4s ease;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Playfair Display', serif; /* */
+            font-weight: 600; /* Slightly bolder headings */
+        }
+
+        /* Subtle background texture pattern */
+        .subtle-bg-texture {
+            /* Example using a simple noise pattern - replace with actual subtle texture */
+            /* background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="4" height="4" viewBox="0 0 4 4"%3E%3Cpath fill="%239C92AC" fill-opacity="0.05" d="M1 3h1v1H1V3zm2-2h1v1H3V1z"%3E%3C/path%3E%3C/svg%3E'); */
+        }
+        .dark .subtle-bg-texture {
+             /* background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="4" height="4" viewBox="0 0 4 4"%3E%3Cpath fill="%23ffffff" fill-opacity="0.04" d="M1 3h1v1H1V3zm2-2h1v1H3V1z"%3E%3C/path%3E%3C/svg%3E'); */
+        }
+
+        /* --- Animations & Transitions --- */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(25px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes scaleIn { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
+        @keyframes pulseWeak { 0%, 100% { opacity: 0.8; } 50% { opacity: 0.4; } }
+        @keyframes typewriter { from { width: 0; } to { width: 100%; } }
+        @keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.015); } } /* More subtle */
+
+        /* Prefers Reduced Motion */
+        @media (prefers-reduced-motion: reduce) {
+          *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+          }
+        }
+
+        /* --- Components & Sections --- */
+        /* Header */
+        .header-link { position: relative; padding-bottom: 4px; overflow: hidden; }
+        .header-link::after {
+            content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 1px; background-color: var(--accent-color);
+            transform: translateX(-101%); transition: transform 0.3s var(--ease-out-cubic);
+        }
+        .header-link:hover::after, .header-link.active::after { transform: translateX(0); } /* */
+
+        /* Hero */
+        .hero-section { height: 100vh; position: relative; overflow: hidden; }
+        .hero-bg {
+            position: absolute; inset: -10px; /* Slightly larger to prevent edge gaps during transform */
+            background-size: cover; background-position: center;
+            z-index: -1; will-change: transform; /* Performance hint */
+            transition: transform 0.1s linear; /* Faster response for mouse move */
+        }
+        .hero-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.05), rgba(0,0,0,0.6)); z-index: -1;} /* Softer gradient */
+        .hero-content { opacity: 0; animation: fadeIn 1.8s 0.3s var(--ease-out-cubic) forwards; }
+        .explore-button { /* */
+             background-color: rgba(255,255,255, 0.1); border: 1px solid rgba(255,255,255, 0.7); backdrop-filter: blur(3px);
+             color: #ffffff; transition: background-color 0.3s var(--ease-out-quad), color 0.3s var(--ease-out-quad), transform 0.2s var(--ease-out-quad);
+        }
+        .explore-button:hover { background-color: rgba(255,255,255, 0.9); color: #111111; transform: translateY(-2px); }
+        .scroll-indicator { animation: pulseWeak 2.5s ease-in-out infinite; } /* Subtle pulse */
+
+        /* Collections Carousel */
+        .collection-carousel { scroll-snap-type: x mandatory; scroll-padding: 0 1.5rem; /* Ensure padding doesn't cut off snapped item */ }
+        .collection-card { /* */
+            position: relative; overflow: hidden; scroll-snap-align: start; transition: box-shadow 0.4s var(--ease-out-cubic);
+        }
+        .collection-card:hover { box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .dark .collection-card:hover { box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .collection-card img { transition: transform 0.6s var(--ease-in-out-cubic); }
+        .collection-card:hover img { transform: scale(1.04); }
+        .collection-card .info-overlay {
+            position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0.1)); /* Smoother gradient */
+            padding: 1.5rem 1rem 1rem; transform: translateY(50%); opacity: 0; /* Start lower down */
+            transition: transform 0.5s var(--ease-out-cubic), opacity 0.4s ease-out; backdrop-filter: blur(2px); /* Subtle blur */
+        }
+        .collection-card:hover .info-overlay { transform: translateY(0); opacity: 1; }
+
+        /* Artist Intro */
+        .artist-photo img { animation: breathe 8s ease-in-out infinite alternate; } /* Slower breathe */
+        #artist-intro-text { opacity: 0; /* Start hidden for typewriter */ }
+        .animate-typewriter {
+            display: inline-block; /* Changed to inline-block */
+            overflow: hidden; white-space: nowrap; vertical-align: bottom; /* Align cursor better */
+            border-right: 3px solid var(--text-color);
+            animation: typewriter 2.5s steps(45, end) 0.5s forwards, blink-caret .75s step-end infinite;
+            opacity: 1 !important; /* Override initial hidden state */
+        }
+        @keyframes blink-caret { from, to { border-color: transparent } 50% { border-color: var(--text-color); } }
+
+        /* Recent Works */
+        .recent-works-grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); } /* Slightly larger min */
+        .recent-work-item {
+            position: relative; overflow: hidden; /* Needed for overlay */
+            transition: transform 0.4s var(--ease-out-cubic), box-shadow 0.4s var(--ease-out-cubic);
+        }
+        .recent-work-item .overlay { /* Simple overlay for title on hover */
+             position: absolute; bottom: 0; left: 0; right: 0; padding: 1rem;
+             background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+             color: white; opacity: 0; transform: translateY(10px);
+             transition: opacity 0.4s var(--ease-out-cubic), transform 0.4s var(--ease-out-cubic);
+        }
+        .recent-work-item:hover {
+            transform: scale(1.03); /* */
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15); /* */
+            z-index: 10;
+        }
+        .recent-work-item:hover .overlay { opacity: 1; transform: translateY(0); }
+        .dark .recent-work-item:hover { box-shadow: 0 15px 35px rgba(0,0,0,0.4); }
+
+        /* Testimonials */
+        .testimonial-item { transition: opacity 0.6s var(--ease-in-out-cubic); }
+        .testimonial-quote::before { /* Slightly adjusted quote mark */
+             font-size: 5rem; top: -1rem; left: -0.5rem; opacity: 0.3; color: var(--accent-color);
+        }
+        #testimonial-dots button { transition: background-color 0.3s ease; }
+
+        /* Newsletter Teaser */
+        #newsletter-teaser { transition: transform 0.6s var(--ease-out-cubic); transform: translateY(150%); } /* Smoother transition */
+        #newsletter-teaser.visible { transform: translateY(0); }
+        #newsletter-teaser input:focus { box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-color), transparent 70%); border-color: var(--accent-color); }
+
+        /* --- Utilities --- */
+        .animate-scroll { opacity: 0; transition: opacity 0.8s var(--ease-out-cubic), transform 0.8s var(--ease-out-cubic); }
+        .animate-scroll.fade-up { transform: translateY(30px); }
+        .animate-scroll.scale-in { transform: scale(0.98); }
+        .is-visible { opacity: 1; transform: translateY(0) scale(1); }
+
+        /* --- Tailwind Config --- */
+        tailwind.config = {
+          darkMode: 'class',
+          theme: {
+            extend: {
+              colors: { /* */
+                'art-accent': 'var(--accent-color)',
+                'art-bg': 'var(--bg-color)',
+                'art-text': 'var(--text-color)',
+                'art-secondary-bg': 'var(--secondary-bg)',
+              },
+              fontFamily: { /* */
+                display: ['Playfair Display', 'serif'],
+                body: ['Inter', 'sans-serif'],
+              },
+              transitionTimingFunction: {
+                'out-quad': 'var(--ease-out-quad)',
+                'out-cubic': 'var(--ease-out-cubic)',
+                'in-out-cubic': 'var(--ease-in-out-cubic)',
+              },
+              aspectRatio: { // Add aspect ratio plugin if needed via CDN, or define here
+                 '4/5': '4 / 5',
+                 '3/4': '3 / 4',
+                 '1/1': '1 / 1',
+               },
+              /* Animations defined via @keyframes */
+            }
+          },
+           plugins: [
+             // Uncomment if using aspect ratio plugin via CDN is not feasible
+             // require('@tailwindcss/aspect-ratio'),
+           ]
+        }
+    </style>
+</head>
+<body class="bg-art-bg text-art-text font-body antialiased" x-data="{ isMobileMenuOpen: false, isDarkMode: false }" x-init="
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+        isDarkMode = true;
+    } else {
+        document.documentElement.classList.remove('dark');
+        isDarkMode = false;
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+        if (!localStorage.getItem('theme')) {
+            isDarkMode = e.matches;
+            document.documentElement.classList.toggle('dark', e.matches);
+        }
+    });
+">
+
+    <header class="fixed top-0 left-0 right-0 z-40 transition-shadow duration-300" :class="{ 'shadow-md bg-art-bg/90 dark:bg-art-bg/80 backdrop-blur-md': window.pageYOffset > 50 }">
+      <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+        <a href="#home" class="text-2xl font-display font-bold hover:text-art-accent transition-colors duration-300">Artist Name</a>
+        <div class="hidden md:flex space-x-8 items-center">
+            <a href="#home" class="header-link hover:text-art-accent transition-colors duration-300 active">Home</a>
+            <a href="art-work-detail.html" class="header-link hover:text-art-accent transition-colors duration-300">Collections</a>
+            <a href="about.html" class="header-link hover:text-art-accent transition-colors duration-300">About</a>
+            <a href="gallery.html" class="header-link hover:text-art-accent transition-colors duration-300">Gallery</a>
+            <button @click="isDarkMode = !isDarkMode; document.documentElement.classList.toggle('dark'); localStorage.setItem('theme', isDarkMode ? 'dark' : 'light')" id="dark-mode-toggle" aria-label="Toggle Dark Mode" :aria-checked="isDarkMode.toString()" class="p-2 rounded-full hover:bg-art-secondary-bg transition-colors duration-300">
+                <svg x-show="!isDarkMode" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                <svg x-show="isDarkMode" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zM1 11a1 1 0 100-2H0a1 1 0 100 2h1zm-.657 3.536a1 1 0 011.414 0l.707.707a1 1 0 01-1.414 1.414l-.707-.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+            </button>
+        </div>
+         <button @click="isMobileMenuOpen = !isMobileMenuOpen" class="md:hidden focus:outline-none p-2 -mr-2" aria-controls="mobile-menu" :aria-expanded="isMobileMenuOpen.toString()">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+        </button>
+      </nav>
+       <div x-show="isMobileMenuOpen" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform -translate-y-4" x-transition:enter-end="opacity-100 transform translate-y-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 transform translate-y-0" x-transition:leave-end="opacity-0 transform -translate-y-4" @click.outside="isMobileMenuOpen = false" id="mobile-menu" class="md:hidden absolute top-full left-0 right-0 bg-art-bg shadow-lg py-4">
+          <a href="#home" @click="isMobileMenuOpen = false" class="block px-6 py-2 hover:bg-art-secondary-bg transition-colors duration-200">Home</a>
+          <a href="#collections" @click="isMobileMenuOpen = false" class="block px-6 py-2 hover:bg-art-secondary-bg transition-colors duration-200">Collections</a>
+          <a href="#about-preview" @click="isMobileMenuOpen = false" class="block px-6 py-2 hover:bg-art-secondary-bg transition-colors duration-200">About</a>
+           <a href="/gallery" @click="isMobileMenuOpen = false" class="block px-6 py-2 hover:bg-art-secondary-bg transition-colors duration-200">Gallery</a>
+           <button @click="isDarkMode = !isDarkMode; document.documentElement.classList.toggle('dark'); localStorage.setItem('theme', isDarkMode ? 'dark' : 'light')" class="w-full text-left flex justify-between items-center px-6 py-2 mt-2 hover:bg-art-secondary-bg transition-colors duration-200">
+               <span>Dark Mode</span>
+               <span class="text-xs px-2 py-1 rounded" :class="isDarkMode ? 'bg-art-accent text-white' : 'bg-gray-200 dark:bg-gray-600'">
+                   <span x-text="isDarkMode ? 'On' : 'Off'"></span>
+               </span>
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <section id="home" class="hero-section flex items-center justify-center text-center text-white">
+             <div id="hero-bg-element" class="hero-bg" style="background-image: url('https://images.unsplash.com/photo-1547891654-e66ed7ebb968?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');"></div>
+             <div class="hero-overlay"></div>
+             <div class="relative z-10 hero-content p-6 max-w-3xl mx-auto">
+                <h1 class="text-5xl md:text-7xl lg:text-8xl font-display mb-4 font-bold leading-tight">Capturing Light & Shadow</h1>
+                <p class="text-xl md:text-2xl mb-10 font-light opacity-90">Explore the latest collection from [Artist Name].</p>
+                <a href="#collections" class="explore-button inline-block px-10 py-4 text-lg font-medium rounded-full transition duration-300 ease-out-quad">
+                    Discover The Art
+                </a>
+             </div>
+             <a href="#collections" class="scroll-indicator absolute bottom-10 left-1/2 transform -translate-x-1/2 text-white hover:text-opacity-80 transition-opacity" aria-label="Scroll down">
+                 <svg class="w-6 h-10 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+            </a>
+        </section>
+
+        <section id="collections" class="py-20 md:py-32 bg-art-secondary-bg subtle-bg-texture">
+            <div class="container mx-auto px-6">
+                 <h2 class="text-4xl md:text-5xl font-display text-center mb-16 animate-scroll fade-up">Featured Collections</h2>
+                <div class="flex overflow-x-auto space-x-6 md:space-x-10 pb-10 collection-carousel -mx-6 px-6 md:-mx-10 md:px-10">
+                    <a href="/gallery/collection-one" class="flex-shrink-0 w-80 md:w-[400px] collection-card rounded-lg overflow-hidden animate-scroll scale-in bg-art-bg">
+                         <img src="https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1045&q=80" alt="Abstract floral artwork" class="w-full h-64 md:h-80 object-cover">
+                        <div class="info-overlay text-white">
+                            <h3 class="text-2xl font-display mb-1">Chromatic Dreams</h3>
+                             <p class="text-sm opacity-80 font-light">12 Pieces</p>
+                        </div>
+                    </a>
+                    <a href="/gallery/collection-two" class="flex-shrink-0 w-80 md:w-[400px] collection-card rounded-lg overflow-hidden animate-scroll scale-in bg-art-bg" style="animation-delay: 0.1s;">
+                         <img src="https://images.unsplash.com/photo-1578926375605-eaf7559b1458?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1077&q=80" alt="Geometric abstract painting" class="w-full h-64 md:h-80 object-cover">
+                         <div class="info-overlay text-white">
+                            <h3 class="text-2xl font-display mb-1">Geometric Echoes</h3>
+                             <p class="text-sm opacity-80 font-light">8 Pieces</p>
+                        </div>
+                    </a>
+                    <a href="/gallery/collection-three" class="flex-shrink-0 w-80 md:w-[400px] collection-card rounded-lg overflow-hidden animate-scroll scale-in bg-art-bg" style="animation-delay: 0.2s;">
+                         <img src="https://images.unsplash.com/photo-1551736949-18879a6fac09?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="Portrait painting" class="w-full h-64 md:h-80 object-cover">
+                        <div class="info-overlay text-white">
+                            <h3 class="text-2xl font-display mb-1">Urban Portraits</h3>
+                             <p class="text-sm opacity-80 font-light">15 Pieces</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+         <section id="about-preview" class="py-20 md:py-32 overflow-hidden">
+            <div class="container mx-auto px-6 grid md:grid-cols-2 gap-12 md:gap-20 items-center">
+                 <div class="artist-photo animate-scroll fade-up">
+                     <div class="relative aspect-w-4 aspect-h-5">
+                         <img src="https://images.unsplash.com/photo-1569774109605-190bf5f6bb67?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&q=80" alt="Portrait of the Artist" class="w-full h-full object-cover rounded-lg shadow-xl">
+                     </div>
+                </div>
+                <div class="artist-statement text-center md:text-left animate-scroll fade-up" style="animation-delay: 0.15s;">
+                    <h2 class="text-4xl md:text-5xl font-display mb-6">Meet The Artist</h2>
+                    <p class="text-lg mb-6 leading-relaxed max-w-prose">
+                        <span id="artist-intro-text">Driven by the interplay of light and emotion, my work seeks to find the extraordinary in the ordinary...</span>
+                    </p>
+                     <span class="block font-display text-2xl italic mt-4">- Artist Name</span>
+                     <a href="/about" class="inline-flex items-center text-art-accent mt-8 group">
+                         Learn More
+                         <svg class="w-4 h-4 ml-2 transform group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                    </a>
+                 </div>
+            </div>
+        </section>
+
+         <section id="recent-works" class="py-20 md:py-32 bg-art-secondary-bg subtle-bg-texture">
+            <div class="container mx-auto px-6">
+                 <h2 class="text-4xl md:text-5xl font-display text-center mb-16 animate-scroll fade-up">Recent Works</h2>
+                 <div class="grid gap-8 md:gap-10 recent-works-grid">
+                     <a href="/artwork/title-1" class="recent-work-item group animate-scroll scale-in block bg-art-bg shadow-lg hover:shadow-2xl rounded-lg overflow-hidden cursor-pointer" style="animation-delay: 0s;">
+                         <div class="aspect-w-1 aspect-h-1">
+                             <img src="https://images.unsplash.com/photo-1579965342575-16428a765588?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=769&q=80" alt="Recent Artwork 1 Title" loading="lazy" class="object-cover w-full h-full transition-transform duration-500 ease-in-out-cubic group-hover:scale-105">
+                         </div>
+                         <div class="overlay">
+                             <h4 class="font-display text-xl truncate">Ephemeral Coast</h4>
+                         </div>
+                     </a>
+                    <a href="/artwork/title-2" class="recent-work-item group animate-scroll scale-in block bg-art-bg shadow-lg hover:shadow-2xl rounded-lg overflow-hidden cursor-pointer md:col-span-1 md:row-span-2" style="animation-delay: 0.1s;">
+                        <div class="aspect-w-3 aspect-h-4">
+                             <img src="https://images.unsplash.com/photo-1506806737300-4dba305e5854?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&q=80" alt="Featured Recent Artwork" loading="lazy" class="object-cover w-full h-full transition-transform duration-500 ease-in-out-cubic group-hover:scale-105">
+                         </div>
+                        <div class="overlay">
+                            <h4 class="font-display text-xl truncate">Crimson Study</h4>
+                        </div>
+                    </a>
+                     <a href="/artwork/title-3" class="recent-work-item group animate-scroll scale-in block bg-art-bg shadow-lg hover:shadow-2xl rounded-lg overflow-hidden cursor-pointer" style="animation-delay: 0.2s;">
+                         <div class="aspect-w-1 aspect-h-1">
+                             <img src="https://images.unsplash.com/photo-1577086809766-91b3c27a3504?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=776&q=80" alt="Recent Artwork 2 Title" loading="lazy" class="object-cover w-full h-full transition-transform duration-500 ease-in-out-cubic group-hover:scale-105">
+                         </div>
+                         <div class="overlay">
+                            <h4 class="font-display text-xl truncate">Silent Bloom</h4>
+                         </div>
+                     </a>
+                    <a href="/artwork/title-4" class="recent-work-item group animate-scroll scale-in block bg-art-bg shadow-lg hover:shadow-2xl rounded-lg overflow-hidden cursor-pointer" style="animation-delay: 0.3s;">
+                         <div class="aspect-w-1 aspect-h-1">
+                             <img src="https://images.unsplash.com/photo-1578301978018-3005759f48f7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=791&q=80" alt="Recent Artwork 3 Title" loading="lazy" class="object-cover w-full h-full transition-transform duration-500 ease-in-out-cubic group-hover:scale-105">
+                        </div>
+                        <div class="overlay">
+                            <h4 class="font-display text-xl truncate">Golden Hour</h4>
+                        </div>
+                    </a>
+                 </div>
+                 <div class="text-center mt-16 animate-scroll fade-up" style="animation-delay: 0.4s;">
+                     <a href="/gallery" class="explore-button inline-block px-10 py-4 text-lg font-medium rounded-full transition duration-300 ease-out-quad group">
+                         View Full Gallery
+                        <span class="inline-block transform group-hover:translate-x-1.5 transition-transform duration-200 ml-2">&rarr;</span>
+                    </a>
+                 </div>
+            </div>
+        </section>
+
+        <section id="testimonials" class="py-20 md:py-32">
+             <div class="container mx-auto px-6 text-center">
+                 <h2 class="text-4xl md:text-5xl font-display mb-16 animate-scroll fade-up">Recognition</h2>
+                 <div id="testimonial-carousel" class="relative max-w-3xl mx-auto h-48" x-data="testimonialSlider()">
+                    <div x-show="activeIndex === 0" x-transition:enter="transition ease-in-out-cubic duration-600" x-transition:enter-start="opacity-0 transform translate-y-5" x-transition:enter-end="opacity-100 transform translate-y-0" x-transition:leave="transition ease-in-out-cubic duration-600" x-transition:leave-start="opacity-100 transform translate-y-0" x-transition:leave-end="opacity-0 transform -translate-y-5" class="testimonial-item absolute inset-0">
+                         <blockquote class="testimonial-quote text-xl md:text-2xl italic mb-4 leading-relaxed max-w-2xl mx-auto">
+                            "This artist's work is truly captivating. A centerpiece in our collection."
+                         </blockquote>
+                         <cite class="block text-base not-italic font-medium opacity-80">- Satisfied Collector</cite>
+                     </div>
+                     <div x-show="activeIndex === 1" x-transition:enter="transition ease-in-out-cubic duration-600" x-transition:enter-start="opacity-0 transform translate-y-5" x-transition:enter-end="opacity-100 transform translate-y-0" x-transition:leave="transition ease-in-out-cubic duration-600" x-transition:leave-start="opacity-100 transform translate-y-0" x-transition:leave-end="opacity-0 transform -translate-y-5" class="testimonial-item absolute inset-0">
+                        <blockquote class="testimonial-quote text-xl md:text-2xl italic mb-4 leading-relaxed max-w-2xl mx-auto">
+                            "The attention to detail and emotional depth is astounding."
+                        </blockquote>
+                         <cite class="block text-base not-italic font-medium opacity-80">- Art Critic Weekly</cite>
+                    </div>
+                     <div x-show="activeIndex === 2" x-transition:enter="transition ease-in-out-cubic duration-600" x-transition:enter-start="opacity-0 transform translate-y-5" x-transition:enter-end="opacity-100 transform translate-y-0" x-transition:leave="transition ease-in-out-cubic duration-600" x-transition:leave-start="opacity-100 transform translate-y-0" x-transition:leave-end="opacity-0 transform -translate-y-5" class="testimonial-item absolute inset-0">
+                         <blockquote class="testimonial-quote text-xl md:text-2xl italic mb-4 leading-relaxed max-w-2xl mx-auto">
+                            "A powerful and evocative new voice in contemporary art."
+                         </blockquote>
+                         <cite class="block text-base not-italic font-medium opacity-80">- Gallery Curator</cite>
+                     </div>
+                 </div>
+                 <div id="testimonial-dots" class="flex justify-center space-x-3 mt-8" x-data="testimonialSlider()">
+                     <template x-for="(item, index) in items" :key="index">
+                        <button @click="setActive(index)" class="w-2.5 h-2.5 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-art-accent" :class="activeIndex === index ? 'bg-art-accent' : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'" :aria-label="`Go to testimonial ${index + 1}`"></button>
+                     </template>
+                 </div>
+            </div>
+        </section>
+
+        <footer class="py-12 bg-art-secondary-bg text-center border-t border-black/5 dark:border-white/5">
+            <div class="container mx-auto px-6">
+                 <div class="mb-4">
+                     <a href="#" class="inline-block p-2 text-art-text/60 hover:text-art-accent transition-colors duration-200" aria-label="Facebook"> F </a>
+                     <a href="#" class="inline-block p-2 text-art-text/60 hover:text-art-accent transition-colors duration-200" aria-label="Instagram"> I </a>
+                     <a href="#" class="inline-block p-2 text-art-text/60 hover:text-art-accent transition-colors duration-200" aria-label="Twitter"> T </a>
+                 </div>
+                <p class="text-sm text-art-text/60">&copy; <span x-text="new Date().getFullYear()"></span> Artist Name. All Rights Reserved.</p>
+                 <p class="text-xs text-art-text/40 mt-2">Designed with Care</p>
+            </div>
+        </footer>
+
+        <div id="newsletter-teaser" x-data="{ shown: false }" x-intersect.once="shown = true" :class="{ 'visible': shown }" class="fixed bottom-6 right-6 bg-art-bg/90 dark:bg-art-secondary-bg/95 backdrop-blur-md shadow-xl rounded-lg p-6 w-full max-w-sm border border-black/10 dark:border-white/10 z-50">
+             <button @click="$el.remove()" id="close-teaser" class="absolute top-3 right-3 text-art-text/50 hover:text-art-accent transition-colors p-1 rounded-full focus:outline-none focus:ring-1 focus:ring-art-accent" aria-label="Close newsletter signup">&times;</button>
+             <h4 class="font-display text-lg mb-2">Stay Inspired</h4>
+             <p class="text-sm mb-4 opacity-80">Join our mailing list for exhibition news and new works.</p>
+             <form>
+                 <input type="email" placeholder="Your email address" class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-art-secondary-bg dark:bg-art-bg focus:outline-none focus:border-art-accent focus:ring-1 focus:ring-art-accent mb-3 transition-colors duration-200" required>
+                 <button type="submit" class="w-full px-4 py-2.5 bg-art-accent text-white rounded hover:opacity-90 transition-opacity duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-art-accent focus:ring-offset-art-bg dark:focus:ring-offset-art-secondary-bg">Subscribe</button>
+            </form>
+        </div>
+
+    </main>
+
+    <script>
+        // --- Alpine.js Data for Testimonials ---
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('testimonialSlider', () => ({
+                activeIndex: 0,
+                items: [], // Will be populated by the number of items
+                interval: null,
+                init() {
+                    this.items = this.$root.querySelectorAll('.testimonial-item');
+                     if (!this.items.length) return;
+                     // Correctly get the dots associated with this slider instance
+                     const dotsContainer = this.$root.nextElementSibling; // Assumes dots container is immediate sibling
+                     if(dotsContainer) {
+                         // If using template x-for for dots, logic might need adjustment
+                         // This assumes static buttons exist matching items count
+                         // Or better, integrate dot logic within this component if dots are inside the x-data scope
+                     }
+                     this.start();
+                     // Pause on hover
+                      const container = this.$root; // The carousel container itself
+                      container.addEventListener('mouseenter', () => this.stop());
+                      container.addEventListener('mouseleave', () => this.start());
+                 },
+                 setActive(index) {
+                     this.activeIndex = index;
+                     this.resetInterval();
+                 },
+                 next() {
+                     this.activeIndex = (this.activeIndex + 1) % this.items.length;
+                 },
+                 start() {
+                     this.stop(); // Clear existing interval
+                     this.interval = setInterval(() => this.next(), 7000); // Rotate every 7 seconds
+                 },
+                 stop() {
+                     clearInterval(this.interval);
+                 },
+                 resetInterval() {
+                     this.stop();
+                     this.start();
+                 }
+            }));
+        });
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- Hero Section Effects (Refined) ---
+            const heroBg = document.getElementById('hero-bg-element');
+             let lastScrollY = window.pageYOffset;
+             let ticking = false;
+
+            function handleScroll() {
+                lastScrollY = window.pageYOffset;
+                if (!ticking) {
+                     window.requestAnimationFrame(() => {
+                         // Parallax
+                         if (heroBg) { // Check if element exists
+                             heroBg.style.transform = `translateY(${lastScrollY * 0.3}px) scale(1.02)`; // Keep slight scale
+                         }
+
+                         // Header Background Visibility moved to header's Alpine :class
+
+                        ticking = false;
+                    });
+                    ticking = true;
+                }
+            }
+
+             if (heroBg) {
+                 // Initial scale
+                 setTimeout(() => {
+                     if (window.pageYOffset === 0) {
+                         heroBg.style.transition = 'transform 1.5s var(--ease-out-cubic)';
+                         heroBg.style.transform = 'translateY(0) scale(1.02)';
+                     } else {
+                        heroBg.style.transform = `translateY(${window.pageYOffset * 0.3}px) scale(1.02)`;
+                    }
+                 }, 100);
+
+                window.addEventListener('scroll', handleScroll, { passive: true });
+
+                // Mouse Move Effect
+                 const heroSection = document.getElementById('home'); // Target the section for bounds
+                 if (heroSection) {
+                     heroSection.addEventListener('mousemove', (e) => {
+                         const { clientWidth, clientHeight } = heroSection; // Use section bounds
+                         const xPercent = (e.clientX / clientWidth - 0.5) * 2;
+                         const yPercent = (e.clientY / clientHeight - 0.5) * 2;
+                         const maxShift = 4;
+
+                        window.requestAnimationFrame(() => {
+                             const currentTranslateY = lastScrollY * 0.3;
+                             heroBg.style.transform = `translate3d(${xPercent * maxShift}px, ${currentTranslateY + yPercent * maxShift}px, 0) scale(1.02)`;
+                        });
+                     });
+                     heroSection.addEventListener('mouseleave', () => {
+                          window.requestAnimationFrame(() => {
+                             const currentTranslateY = lastScrollY * 0.3;
+                             heroBg.style.transform = `translate3d(0, ${currentTranslateY}px, 0) scale(1.02)`;
+                          });
+                     });
+                 }
+            }
+
+
+            // --- Intersection Observer for Scroll Animations ---
+             const scrollObserver = new IntersectionObserver((entries, observer) => {
+                 entries.forEach(entry => {
+                     if (entry.isIntersecting) {
+                         entry.target.classList.add('is-visible');
+                          if (entry.target.id === 'artist-intro-text' && !entry.target.classList.contains('typed')) {
+                             entry.target.classList.add('animate-typewriter', 'typed');
+                         }
+                         observer.unobserve(entry.target);
+                     }
+                 });
+             }, { threshold: 0.1 });
+
+             document.querySelectorAll('.animate-scroll').forEach(el => {
+                 if (!el.classList.contains('fade-up') && !el.classList.contains('scale-in')) {
+                     el.classList.add('fade-up');
+                 }
+                 scrollObserver.observe(el);
+             });
+
+
+             // --- Smooth Scroll ---
+             document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    const targetId = this.getAttribute('href');
+                    if (targetId.length > 1) {
+                         const targetElement = document.querySelector(targetId);
+                         if(targetElement) {
+                            e.preventDefault();
+                             targetElement.scrollIntoView({ behavior: 'smooth' });
+                        }
+                    }
+                });
+            });
+
+             // --- Active Nav Link Highlighting ---
+             const sections = document.querySelectorAll('main section[id]');
+             const navLinks = document.querySelectorAll('header nav a[href^="#"]');
+
+             if (sections.length > 0 && navLinks.length > 0) { // Ensure elements exist
+                 const observerOptionsNav = {
+                     rootMargin: '-20% 0px -80% 0px',
+                     threshold: 0
+                 };
+
+                 const navObserver = new IntersectionObserver((entries) => {
+                     entries.forEach(entry => {
+                         if (entry.isIntersecting) {
+                             const id = entry.target.getAttribute('id');
+                             navLinks.forEach(link => {
+                                 link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+                             });
+                         }
+                     });
+                 }, observerOptionsNav);
+
+                 sections.forEach(section => {
+                     navObserver.observe(section);
+                 });
+             }
+
+
+        }); // End DOMContentLoaded
+    </script>
+
+</body>
+</html>
